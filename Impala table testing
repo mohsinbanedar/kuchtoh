@@ -1,0 +1,1330 @@
+Impala table testing:
+
+CREATE TABLE default.tips (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/user/hive/warehouse/tips' TBLPROPERTIES ('skip.header.line.count'='1')
+
+Defaults
+Managed PQ
+Managed CSV
+External PQ
+External PQ with Purge
+Managed PQ with location
+External PQ with Purge and location
+
+CREATE TABLE default.tips_defaults AS SELECT * FROM default.tips;
+
+CREATE TABLE default.tips_managed_pq STORED AS PARQUETFILE AS SELECT * FROM tips;
+
+CREATE TABLE default.tips_managed_csv ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE AS SELECT * FROM tips;
+
+CREATE EXTERNAL TABLE default.tips_ext_pq (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_pq_ext/'; 
+
+INSERT INTO default.tips_ext_pq SELECT * FROM default.tips;
+
+CREATE EXTERNAL TABLE default.tips_ext_csv (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_csv_ext/'; 
+
+INSERT INTO default.tips_ext_csv SELECT * FROM default.tips;
+
+CREATE EXTERNAL TABLE default.tips_ext_pq_purge (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_pq_ext_purge/' TBLPROPERTIES ('external.table.purge'='true'); 
+
+INSERT INTO default.tips_ext_pq_purge SELECT * FROM default.tips;
+
+CREATE TABLE default.tips_pq_loc (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_pq_loc/' ;
+
+INSERT INTO default.tips_pq_loc SELECT * FROM default.tips;
+
+CREATE EXTERNAL TABLE default.tips_ext_csv_purge (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_csv_ext/' TBLPROPERTIES ('external.table.purge'='true'); 
+
+INSERT INTO default.tips_ext_csv_purge SELECT * FROM default.tips;
+
+
+/* Hive */
+
+create table default.tips_orc STORED AS orc AS SELECT * FROM default.tips;
+
+create table default.tips_orc_external STORED AS orc LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_orc_ext/' AS SELECT * FROM default.tips;
+
+create table default.tips_orc_external_purge STORED AS orc LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_orc_ext_purge/' TBLPROPERTIES ('external.table.purge'='true') AS SELECT * FROM default.tips;
+
+SHOW CREATE TABLE tips_orc;
+SHOW CREATE TABLE tips_orc_external;
+SHOW CREATE TABLE tips_orc_external_purge;
+
+
+SHOW CREATE TABLE default.tips              ;
+SHOW CREATE TABLE default.tips_defaults     ;
+SHOW CREATE TABLE default.tips_ext_csv      ;
+SHOW CREATE TABLE default.tips_ext_csv_purge;
+SHOW CREATE TABLE default.tips_ext_pq       ;
+SHOW CREATE TABLE default.tips_ext_pq_purge ;
+SHOW CREATE TABLE default.tips_managed_csv  ;
+SHOW CREATE TABLE default.tips_managed_pq   ;
+SHOW CREATE TABLE default.tips_pq_loc;
+
+
+
+CREATE DATABASE db_std_loc;
+
+USE  db_std_loc;
+
+CREATE TABLE tips AS SELECT * FROM default.tips;
+
+CREATE TABLE db_std_loc.tips_defaults AS SELECT * FROM tips;
+
+CREATE TABLE db_std_loc.tips_managed_pq STORED AS PARQUETFILE AS SELECT * FROM tips;
+
+CREATE TABLE db_std_loc.tips_managed_csv ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE AS SELECT * FROM tips;
+
+CREATE EXTERNAL TABLE db_std_loc.tips_ext_pq (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_pq_ext/'; 
+
+INSERT INTO db_std_loc.tips_ext_pq SELECT * FROM db_std_loc.tips;
+
+CREATE EXTERNAL TABLE db_std_loc.tips_ext_csv (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_csv_ext/'; 
+
+INSERT INTO db_std_loc.tips_ext_csv SELECT * FROM db_std_loc.tips;
+
+CREATE EXTERNAL TABLE db_std_loc.tips_ext_pq_purge (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_pq_ext_purge/' TBLPROPERTIES ('external.table.purge'='true'); 
+
+INSERT INTO db_std_loc.tips_ext_pq_purge SELECT * FROM db_std_loc.tips;
+
+CREATE TABLE db_std_loc.tips_pq_loc (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_pq_loc/' ;
+
+INSERT INTO db_std_loc.tips_pq_loc SELECT * FROM db_std_loc.tips;
+
+CREATE EXTERNAL TABLE db_std_loc.tips_ext_csv_purge (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_csv_ext/' TBLPROPERTIES ('external.table.purge'='true'); 
+
+INSERT INTO db_std_loc.tips_ext_csv_purge SELECT * FROM db_std_loc.tips;
+
+
+SHOW CREATE TABLE db_std_loc.tips              ;
+SHOW CREATE TABLE db_std_loc.tips_defaults     ;
+SHOW CREATE TABLE db_std_loc.tips_ext_csv      ;
+SHOW CREATE TABLE db_std_loc.tips_ext_csv_purge;
+SHOW CREATE TABLE db_std_loc.tips_ext_pq       ;
+SHOW CREATE TABLE db_std_loc.tips_ext_pq_purge ;
+SHOW CREATE TABLE db_std_loc.tips_managed_csv  ;
+SHOW CREATE TABLE db_std_loc.tips_managed_pq   ;
+SHOW CREATE TABLE db_std_loc.tips_pq_loc;
+
+
+/* Hive */
+
+create table db_std_loc.tips_orc STORED AS orc AS SELECT * FROM default.tips;
+
+create table db_std_loc.tips_orc_external STORED AS orc LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_orc_ext/' AS SELECT * FROM default.tips;
+
+create table db_std_loc.tips_orc_external_purge STORED AS orc LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_orc_ext_purge/' TBLPROPERTIES ('external.table.purge'='true') AS SELECT * FROM default.tips;
+
+SHOW CREATE TABLE tips_orc;
+SHOW CREATE TABLE tips_orc_external;
+SHOW CREATE TABLE tips_orc_external_purge;
+
+
+
+CREATE DATABASE db_cust_loc LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc';
+
+USE  db_cust_loc;
+
+CREATE TABLE tips AS SELECT * FROM default.tips;
+
+CREATE TABLE db_cust_loc.tips_defaults AS SELECT * FROM tips;
+
+CREATE TABLE db_cust_loc.tips_managed_pq STORED AS PARQUETFILE AS SELECT * FROM tips;
+
+CREATE TABLE db_cust_loc.tips_managed_csv ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE AS SELECT * FROM tips;
+
+CREATE EXTERNAL TABLE db_cust_loc.tips_ext_pq (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc_tips_pq_ext/'; 
+
+INSERT INTO db_cust_loc.tips_ext_pq SELECT * FROM db_cust_loc.tips;
+
+CREATE EXTERNAL TABLE db_cust_loc.tips_ext_csv (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc_tips_csv_ext/'; 
+
+INSERT INTO db_cust_loc.tips_ext_csv SELECT * FROM db_cust_loc.tips;
+
+CREATE EXTERNAL TABLE db_cust_loc.tips_ext_pq_purge (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc_tips_pq_ext_purge/' TBLPROPERTIES ('external.table.purge'='true'); 
+
+INSERT INTO db_cust_loc.tips_ext_pq_purge SELECT * FROM db_cust_loc.tips;
+
+CREATE TABLE db_cust_loc.tips_pq_loc (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc_tips_pq_loc/' ;
+
+INSERT INTO db_cust_loc.tips_pq_loc SELECT * FROM db_cust_loc.tips;
+
+CREATE EXTERNAL TABLE db_cust_loc.tips_ext_csv_purge (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc_tips_csv_ext/' TBLPROPERTIES ('external.table.purge'='true'); 
+
+INSERT INTO db_cust_loc.tips_ext_csv_purge SELECT * FROM db_cust_loc.tips;
+
+SHOW CREATE TABLE db_cust_loc.tips              ;
+SHOW CREATE TABLE db_cust_loc.tips_defaults     ;
+SHOW CREATE TABLE db_cust_loc.tips_ext_csv      ;
+SHOW CREATE TABLE db_cust_loc.tips_ext_csv_purge;
+SHOW CREATE TABLE db_cust_loc.tips_ext_pq       ;
+SHOW CREATE TABLE db_cust_loc.tips_ext_pq_purge ;
+SHOW CREATE TABLE db_cust_loc.tips_managed_csv  ;
+SHOW CREATE TABLE db_cust_loc.tips_managed_pq   ;
+SHOW CREATE TABLE db_cust_loc.tips_pq_loc;
+
+/* Hive */
+
+create table db_cust_loc.tips_orc STORED AS orc AS SELECT * FROM default.tips;
+
+create table db_cust_loc.tips_orc_external STORED AS orc LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc_tips_orc_ext/' AS SELECT * FROM default.tips;
+
+create table db_cust_loc.tips_orc_external_purge STORED AS orc LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc_tips_orc_ext_purge/' TBLPROPERTIES ('external.table.purge'='true') AS SELECT * FROM default.tips;
+
+create table db_cust_loc.tips_hive_default AS SELECT * FROM default.tips;
+
+SHOW CREATE TABLE db_cust_loc.tips_orc;
+SHOW CREATE TABLE db_cust_loc.tips_orc_external;
+SHOW CREATE TABLE db_cust_loc.tips_orc_external_purge;
+SHOW CREATE TABLE db_cust_loc.tips_hive_default;
+
+
+
+
+
+
+
+
+
+
+
+
+ENDS
+
+
+
+
+
+CREATE EXTERNAL TABLE db_cust_loc.tips_ext_defaults (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE; 
+
+
+CREATE TABLE default.tips_pq_loc (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_pq_loc/' ;
+
+INSERT INTO default.tips_pq_loc SELECT * FROM default.tips;
+
+CREATE TABLE db1.tips_csv_loc (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_csv_loc/' TBLPROPERTIES ('skip.header.line.count'='1');
+
+INSERT INTO default.tips_csv_loc SELECT * FROM default.tips;
+
+CREATE EXTERNAL TABLE db1.tips_csv_ext (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/tips_csv_ext/' TBLPROPERTIES ('skip.header.line.count'='1');
+
+
+CREATE EXTERNAL TABLE db1.tips_pq_ext (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/tips_pq_ext/' ;
+
+
+CREATE DATABASE db1;
+	
+CREATE TABLE db1.tips_pq STORED AS PARQUET AS SELECT * FROM default.tips 
+
+
+CREATE TABLE db1.tips_csv_loc (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/tips_csv_ext/' TBLPROPERTIES ('skip.header.line.count'='1')
+
+
+CREATE TABLE db1.tips_pq_loc (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/tips_pq_ext/' 
+
+
+
+CREATE EXTERNAL TABLE db1.tips_csv_ext (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/tips_csv_ext/' TBLPROPERTIES ('skip.header.line.count'='1');
+
+
+CREATE EXTERNAL TABLE db1.tips_pq_ext (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/tips_pq_ext/' ;
+
+INSERT INTO db1.tips_csv_ext
+SELECT * FROM default.tips;
+
+INSERT INTO db1.tips_pq_ext
+SELECT * FROM default.tips;
+
+
+CREATE TABLE db1.tips_pq_purge STORED AS PARQUETFILE
+AS SELECT * FROM default.tips;
+
+ALTER TABLE db1.tips_pq_purge SET tblproperties ('EXTERNAL'='TRUE','external.table.purge'='true');
+
+
+CREATE DATABASE db2 LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db2'
+
+
+CREATE TABLE db2.tips_pq STORED AS PARQUETFILE AS SELECT * FROM default.tips;
+
+CREATE TABLE db2.tips_csv (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE TBLPROPERTIES ('skip.header.line.count'='1');
+
+INSERT INTO db2.tips_pq
+SELECT * FROM default.tips;
+
+INSERT INTO db2.tips_csv
+SELECT * FROM default.tips;
+
+
+CREATE EXTERNAL TABLE db2.tips_csv_ext (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/tips_csv_ext/' TBLPROPERTIES ('skip.header.line.count'='1');
+
+CREATE EXTERNAL TABLE db1.tips_pq_ext (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/tips_pq_ext/' ;
+
+CREATE TABLE db2.tips_pq_purge STORED AS PARQUETFILE
+AS SELECT * FROM default.tips;
+
+ALTER TABLE db2.tips_pq_purge SET tblproperties ('EXTERNAL'='TRUE','external.table.purge'='true');
+
+
+
+
+CREATE DATABASE ranger;
+CREATE USER rangeradmin WITH PASSWORD 'rangeradmin';
+GRANT ALL PRIVILEGES ON DATABASE ranger TO rangeradmin;
+ALTER ROLE rangeradmin WITH LOGIN;
+rangeradmin123
+
+
+
+
+SHOW CREATE TABLE default.tips_pq;
+SHOW CREATE TABLE default.tips;
+
+
+SHOW CREATE TABLE db1.tips_pq_ext;
+SHOW CREATE TABLE db1.tips_pq_loc;
+SHOW CREATE TABLE db1.tips_pq_purge;
+SHOW CREATE TABLE db1.tips_csv_ext;
+SHOW CREATE TABLE db1.tips_csv_loc;
+SHOW CREATE TABLE db1.tips_pq;
+
+SHOW CREATE TABLE db2.tips_pq_ext;
+SHOW CREATE TABLE db2.tips_csv;
+SHOW CREATE TABLE db2.tips_pq_purge;
+SHOW CREATE TABLE db2.tips_csv_ext;
+SHOW CREATE TABLE db2.tips_pq;
+
+
+
+
+
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_cust_loc.tips              ;
+INFO  : Compiling command(queryId=hive_20200916052222_7155b3cd-4947-4a03-8f62-be82ecd80cae): SHOW CREATE TABLE db_cust_loc.tips
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052222_7155b3cd-4947-4a03-8f62-be82ecd80cae); Time taken: 0.175 seconds
+INFO  : Executing command(queryId=hive_20200916052222_7155b3cd-4947-4a03-8f62-be82ecd80cae): SHOW CREATE TABLE db_cust_loc.tips
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052222_7155b3cd-4947-4a03-8f62-be82ecd80cae); Time taken: 0.019 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `db_cust_loc.tips`(                   |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc/tips' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250413')            |
++----------------------------------------------------+--+
+18 rows selected (0.23 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_cust_loc.tips_defaults     ;
+INFO  : Compiling command(queryId=hive_20200916052222_fda8536e-8f68-4274-bab3-6e9719978308): SHOW CREATE TABLE db_cust_loc.tips_defaults
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052222_fda8536e-8f68-4274-bab3-6e9719978308); Time taken: 0.135 seconds
+INFO  : Executing command(queryId=hive_20200916052222_fda8536e-8f68-4274-bab3-6e9719978308): SHOW CREATE TABLE db_cust_loc.tips_defaults
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052222_fda8536e-8f68-4274-bab3-6e9719978308); Time taken: 0.019 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `db_cust_loc.tips_defaults`(          |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc/tips_defaults' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250414')            |
++----------------------------------------------------+--+
+18 rows selected (0.185 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_cust_loc.tips_ext_csv      ;
+INFO  : Compiling command(queryId=hive_20200916052222_30a1bf2e-3abf-4a5e-bf2a-23bde1bf55b5): SHOW CREATE TABLE db_cust_loc.tips_ext_csv
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052222_30a1bf2e-3abf-4a5e-bf2a-23bde1bf55b5); Time taken: 0.136 seconds
+INFO  : Executing command(queryId=hive_20200916052222_30a1bf2e-3abf-4a5e-bf2a-23bde1bf55b5): SHOW CREATE TABLE db_cust_loc.tips_ext_csv
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052222_30a1bf2e-3abf-4a5e-bf2a-23bde1bf55b5); Time taken: 0.018 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE EXTERNAL TABLE `db_cust_loc.tips_ext_csv`(  |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| WITH SERDEPROPERTIES (                             |
+|   'field.delim'=',',                               |
+|   'serialization.format'=',')                      |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc_tips_csv_ext' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250420')            |
++----------------------------------------------------+--+
+21 rows selected (0.184 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_cust_loc.tips_ext_csv_purge;
+INFO  : Compiling command(queryId=hive_20200916052222_1a54ba39-0659-49d8-a9fd-88ac7de58ba6): SHOW CREATE TABLE db_cust_loc.tips_ext_csv_purge
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052222_1a54ba39-0659-49d8-a9fd-88ac7de58ba6); Time taken: 0.148 seconds
+INFO  : Executing command(queryId=hive_20200916052222_1a54ba39-0659-49d8-a9fd-88ac7de58ba6): SHOW CREATE TABLE db_cust_loc.tips_ext_csv_purge
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052222_1a54ba39-0659-49d8-a9fd-88ac7de58ba6); Time taken: 0.021 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE EXTERNAL TABLE `db_cust_loc.tips_ext_csv_purge`( |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| WITH SERDEPROPERTIES (                             |
+|   'field.delim'=',',                               |
+|   'serialization.format'=',')                      |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc_tips_csv_ext' |
+| TBLPROPERTIES (                                    |
+|   'COLUMN_STATS_ACCURATE'='false',                 |
+|   'external.table.purge'='true',                   |
+|   'numFiles'='0',                                  |
+|   'numRows'='-1',                                  |
+|   'rawDataSize'='-1',                              |
+|   'totalSize'='0',                                 |
+|   'transient_lastDdlTime'='1600250432')            |
++----------------------------------------------------+--+
+27 rows selected (0.202 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_cust_loc.tips_ext_pq       ;
+INFO  : Compiling command(queryId=hive_20200916052222_3b39a965-42eb-44d9-8dbc-023b152b3798): SHOW CREATE TABLE db_cust_loc.tips_ext_pq
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052222_3b39a965-42eb-44d9-8dbc-023b152b3798); Time taken: 0.141 seconds
+INFO  : Executing command(queryId=hive_20200916052222_3b39a965-42eb-44d9-8dbc-023b152b3798): SHOW CREATE TABLE db_cust_loc.tips_ext_pq
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052222_3b39a965-42eb-44d9-8dbc-023b152b3798); Time taken: 0.017 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE EXTERNAL TABLE `db_cust_loc.tips_ext_pq`(   |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'  |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc_tips_pq_ext' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250417')            |
++----------------------------------------------------+--+
+18 rows selected (0.193 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_cust_loc.tips_ext_pq_purge ;
+INFO  : Compiling command(queryId=hive_20200916052222_7c6baa58-9568-4961-bd59-931f4c195bec): SHOW CREATE TABLE db_cust_loc.tips_ext_pq_purge
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052222_7c6baa58-9568-4961-bd59-931f4c195bec); Time taken: 0.144 seconds
+INFO  : Executing command(queryId=hive_20200916052222_7c6baa58-9568-4961-bd59-931f4c195bec): SHOW CREATE TABLE db_cust_loc.tips_ext_pq_purge
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052222_7c6baa58-9568-4961-bd59-931f4c195bec); Time taken: 0.02 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE EXTERNAL TABLE `db_cust_loc.tips_ext_pq_purge`( |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'  |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc_tips_pq_ext_purge' |
+| TBLPROPERTIES (                                    |
+|   'external.table.purge'='true',                   |
+|   'transient_lastDdlTime'='1600250424')            |
++----------------------------------------------------+--+
+19 rows selected (0.198 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_cust_loc.tips_managed_csv  ;
+INFO  : Compiling command(queryId=hive_20200916052222_ab6435ff-47f0-4473-9071-80ac83de03f2): SHOW CREATE TABLE db_cust_loc.tips_managed_csv
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052222_ab6435ff-47f0-4473-9071-80ac83de03f2); Time taken: 0.147 seconds
+INFO  : Executing command(queryId=hive_20200916052222_ab6435ff-47f0-4473-9071-80ac83de03f2): SHOW CREATE TABLE db_cust_loc.tips_managed_csv
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052222_ab6435ff-47f0-4473-9071-80ac83de03f2); Time taken: 0.018 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `db_cust_loc.tips_managed_csv`(       |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| WITH SERDEPROPERTIES (                             |
+|   'field.delim'=',',                               |
+|   'serialization.format'=',')                      |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc/tips_managed_csv' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250416')            |
++----------------------------------------------------+--+
+21 rows selected (0.196 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_cust_loc.tips_managed_pq   ;
+INFO  : Compiling command(queryId=hive_20200916052222_c97ac785-f7eb-4187-bd7a-ef04d759d9e2): SHOW CREATE TABLE db_cust_loc.tips_managed_pq
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052222_c97ac785-f7eb-4187-bd7a-ef04d759d9e2); Time taken: 0.18 seconds
+INFO  : Executing command(queryId=hive_20200916052222_c97ac785-f7eb-4187-bd7a-ef04d759d9e2): SHOW CREATE TABLE db_cust_loc.tips_managed_pq
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052222_c97ac785-f7eb-4187-bd7a-ef04d759d9e2); Time taken: 0.021 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `db_cust_loc.tips_managed_pq`(        |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'  |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc/tips_managed_pq' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250415')            |
++----------------------------------------------------+--+
+18 rows selected (0.236 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_cust_loc.tips_pq_loc;
+INFO  : Compiling command(queryId=hive_20200916052222_029e1316-7d88-4a80-8627-e7547a1c25e6): SHOW CREATE TABLE db_cust_loc.tips_pq_loc
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052222_029e1316-7d88-4a80-8627-e7547a1c25e6); Time taken: 0.145 seconds
+INFO  : Executing command(queryId=hive_20200916052222_029e1316-7d88-4a80-8627-e7547a1c25e6): SHOW CREATE TABLE db_cust_loc.tips_pq_loc
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052222_029e1316-7d88-4a80-8627-e7547a1c25e6); Time taken: 0.017 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `db_cust_loc.tips_pq_loc`(            |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'  |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc_tips_pq_loc' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250428')            |
++----------------------------------------------------+--+
+18 rows selected (0.198 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_std_loc.tips              ;
+INFO  : Compiling command(queryId=hive_20200916052323_6c7f9d4b-e385-47c0-8ca5-098e3bae31f0): SHOW CREATE TABLE db_std_loc.tips
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_6c7f9d4b-e385-47c0-8ca5-098e3bae31f0); Time taken: 0.17 seconds
+INFO  : Executing command(queryId=hive_20200916052323_6c7f9d4b-e385-47c0-8ca5-098e3bae31f0): SHOW CREATE TABLE db_std_loc.tips
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_6c7f9d4b-e385-47c0-8ca5-098e3bae31f0); Time taken: 0.017 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `db_std_loc.tips`(                    |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/user/hive/warehouse/db_std_loc.db/tips' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250272')            |
++----------------------------------------------------+--+
+18 rows selected (0.221 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_std_loc.tips_defaults     ;
+INFO  : Compiling command(queryId=hive_20200916052323_fa683691-f4e4-4d22-ac9e-7227622d501d): SHOW CREATE TABLE db_std_loc.tips_defaults
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_fa683691-f4e4-4d22-ac9e-7227622d501d); Time taken: 0.185 seconds
+INFO  : Executing command(queryId=hive_20200916052323_fa683691-f4e4-4d22-ac9e-7227622d501d): SHOW CREATE TABLE db_std_loc.tips_defaults
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_fa683691-f4e4-4d22-ac9e-7227622d501d); Time taken: 0.017 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `db_std_loc.tips_defaults`(           |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/user/hive/warehouse/db_std_loc.db/tips_defaults' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250273')            |
++----------------------------------------------------+--+
+18 rows selected (0.234 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_std_loc.tips_ext_csv      ;
+INFO  : Compiling command(queryId=hive_20200916052323_eb5bc57a-8113-444f-af7a-8d2be785368b): SHOW CREATE TABLE db_std_loc.tips_ext_csv
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_eb5bc57a-8113-444f-af7a-8d2be785368b); Time taken: 0.124 seconds
+INFO  : Executing command(queryId=hive_20200916052323_eb5bc57a-8113-444f-af7a-8d2be785368b): SHOW CREATE TABLE db_std_loc.tips_ext_csv
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_eb5bc57a-8113-444f-af7a-8d2be785368b); Time taken: 0.02 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE EXTERNAL TABLE `db_std_loc.tips_ext_csv`(   |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| WITH SERDEPROPERTIES (                             |
+|   'field.delim'=',',                               |
+|   'serialization.format'=',')                      |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_csv_ext' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250288')            |
++----------------------------------------------------+--+
+21 rows selected (0.176 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_std_loc.tips_ext_csv_purge;
+INFO  : Compiling command(queryId=hive_20200916052323_4bcf9f6d-f997-42b5-9a06-3b12beb7cebe): SHOW CREATE TABLE db_std_loc.tips_ext_csv_purge
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_4bcf9f6d-f997-42b5-9a06-3b12beb7cebe); Time taken: 0.161 seconds
+INFO  : Executing command(queryId=hive_20200916052323_4bcf9f6d-f997-42b5-9a06-3b12beb7cebe): SHOW CREATE TABLE db_std_loc.tips_ext_csv_purge
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_4bcf9f6d-f997-42b5-9a06-3b12beb7cebe); Time taken: 0.018 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE EXTERNAL TABLE `db_std_loc.tips_ext_csv_purge`( |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| WITH SERDEPROPERTIES (                             |
+|   'field.delim'=',',                               |
+|   'serialization.format'=',')                      |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_csv_ext' |
+| TBLPROPERTIES (                                    |
+|   'COLUMN_STATS_ACCURATE'='false',                 |
+|   'external.table.purge'='true',                   |
+|   'numFiles'='0',                                  |
+|   'numRows'='-1',                                  |
+|   'rawDataSize'='-1',                              |
+|   'totalSize'='0',                                 |
+|   'transient_lastDdlTime'='1600250300')            |
++----------------------------------------------------+--+
+27 rows selected (0.21 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_std_loc.tips_ext_pq       ;
+INFO  : Compiling command(queryId=hive_20200916052323_1506e134-19ab-49ef-b064-38f23a00ec6a): SHOW CREATE TABLE db_std_loc.tips_ext_pq
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_1506e134-19ab-49ef-b064-38f23a00ec6a); Time taken: 0.125 seconds
+INFO  : Executing command(queryId=hive_20200916052323_1506e134-19ab-49ef-b064-38f23a00ec6a): SHOW CREATE TABLE db_std_loc.tips_ext_pq
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_1506e134-19ab-49ef-b064-38f23a00ec6a); Time taken: 0.017 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE EXTERNAL TABLE `db_std_loc.tips_ext_pq`(    |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'  |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_pq_ext' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250283')            |
++----------------------------------------------------+--+
+18 rows selected (0.175 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_std_loc.tips_ext_pq_purge ;
+INFO  : Compiling command(queryId=hive_20200916052323_003888a8-d27b-482f-bb05-31cc66abd6b7): SHOW CREATE TABLE db_std_loc.tips_ext_pq_purge
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_003888a8-d27b-482f-bb05-31cc66abd6b7); Time taken: 0.16 seconds
+INFO  : Executing command(queryId=hive_20200916052323_003888a8-d27b-482f-bb05-31cc66abd6b7): SHOW CREATE TABLE db_std_loc.tips_ext_pq_purge
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_003888a8-d27b-482f-bb05-31cc66abd6b7); Time taken: 0.026 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE EXTERNAL TABLE `db_std_loc.tips_ext_pq_purge`( |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'  |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_pq_ext_purge' |
+| TBLPROPERTIES (                                    |
+|   'external.table.purge'='true',                   |
+|   'transient_lastDdlTime'='1600250292')            |
++----------------------------------------------------+--+
+19 rows selected (0.22 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_std_loc.tips_managed_csv  ;
+INFO  : Compiling command(queryId=hive_20200916052323_16cdeab9-25af-4c53-8c11-f28578ef4e78): SHOW CREATE TABLE db_std_loc.tips_managed_csv
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_16cdeab9-25af-4c53-8c11-f28578ef4e78); Time taken: 0.159 seconds
+INFO  : Executing command(queryId=hive_20200916052323_16cdeab9-25af-4c53-8c11-f28578ef4e78): SHOW CREATE TABLE db_std_loc.tips_managed_csv
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_16cdeab9-25af-4c53-8c11-f28578ef4e78); Time taken: 0.02 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `db_std_loc.tips_managed_csv`(        |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| WITH SERDEPROPERTIES (                             |
+|   'field.delim'=',',                               |
+|   'serialization.format'=',')                      |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/user/hive/warehouse/db_std_loc.db/tips_managed_csv' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250276')            |
++----------------------------------------------------+--+
+21 rows selected (0.212 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_std_loc.tips_managed_pq   ;
+INFO  : Compiling command(queryId=hive_20200916052323_828582fe-9883-497a-b1d5-bd92c6956381): SHOW CREATE TABLE db_std_loc.tips_managed_pq
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_828582fe-9883-497a-b1d5-bd92c6956381); Time taken: 0.155 seconds
+INFO  : Executing command(queryId=hive_20200916052323_828582fe-9883-497a-b1d5-bd92c6956381): SHOW CREATE TABLE db_std_loc.tips_managed_pq
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_828582fe-9883-497a-b1d5-bd92c6956381); Time taken: 0.017 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `db_std_loc.tips_managed_pq`(         |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'  |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/user/hive/warehouse/db_std_loc.db/tips_managed_pq' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250274')            |
++----------------------------------------------------+--+
+18 rows selected (0.204 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE db_std_loc.tips_pq_loc;
+INFO  : Compiling command(queryId=hive_20200916052323_349d98ad-d19f-4663-8a81-7266915892fa): SHOW CREATE TABLE db_std_loc.tips_pq_loc
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_349d98ad-d19f-4663-8a81-7266915892fa); Time taken: 0.168 seconds
+INFO  : Executing command(queryId=hive_20200916052323_349d98ad-d19f-4663-8a81-7266915892fa): SHOW CREATE TABLE db_std_loc.tips_pq_loc
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_349d98ad-d19f-4663-8a81-7266915892fa); Time taken: 0.019 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `db_std_loc.tips_pq_loc`(             |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'  |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_pq_loc' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250296')            |
++----------------------------------------------------+--+
+18 rows selected (0.22 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE default.tips              ;
+INFO  : Compiling command(queryId=hive_20200916052323_f3b14d30-26fb-4bd4-bb37-e628dc555de3): SHOW CREATE TABLE default.tips
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_f3b14d30-26fb-4bd4-bb37-e628dc555de3); Time taken: 0.169 seconds
+INFO  : Executing command(queryId=hive_20200916052323_f3b14d30-26fb-4bd4-bb37-e628dc555de3): SHOW CREATE TABLE default.tips
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_f3b14d30-26fb-4bd4-bb37-e628dc555de3); Time taken: 0.023 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `default.tips`(                       |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| WITH SERDEPROPERTIES (                             |
+|   'field.delim'=',',                               |
+|   'serialization.format'=',')                      |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/user/hive/warehouse/tips' |
+| TBLPROPERTIES (                                    |
+|   'skip.header.line.count'='1',                    |
+|   'transient_lastDdlTime'='1600246642')            |
++----------------------------------------------------+--+
+22 rows selected (0.227 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE default.tips_defaults     ;
+INFO  : Compiling command(queryId=hive_20200916052323_92f31f5b-d8a3-4cfd-9de0-e2b48ac3946d): SHOW CREATE TABLE default.tips_defaults
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_92f31f5b-d8a3-4cfd-9de0-e2b48ac3946d); Time taken: 0.164 seconds
+INFO  : Executing command(queryId=hive_20200916052323_92f31f5b-d8a3-4cfd-9de0-e2b48ac3946d): SHOW CREATE TABLE default.tips_defaults
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_92f31f5b-d8a3-4cfd-9de0-e2b48ac3946d); Time taken: 0.018 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `default.tips_defaults`(              |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/user/hive/warehouse/tips_defaults' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600249918')            |
++----------------------------------------------------+--+
+18 rows selected (0.211 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE default.tips_ext_csv      ;
+INFO  : Compiling command(queryId=hive_20200916052323_63a6df1d-aa5b-414d-8f03-3eb36bc02c72): SHOW CREATE TABLE default.tips_ext_csv
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_63a6df1d-aa5b-414d-8f03-3eb36bc02c72); Time taken: 0.149 seconds
+INFO  : Executing command(queryId=hive_20200916052323_63a6df1d-aa5b-414d-8f03-3eb36bc02c72): SHOW CREATE TABLE default.tips_ext_csv
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_63a6df1d-aa5b-414d-8f03-3eb36bc02c72); Time taken: 0.02 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE EXTERNAL TABLE `default.tips_ext_csv`(      |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| WITH SERDEPROPERTIES (                             |
+|   'field.delim'=',',                               |
+|   'serialization.format'=',')                      |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_csv_ext' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600249963')            |
++----------------------------------------------------+--+
+21 rows selected (0.197 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE default.tips_ext_csv_purge;
+INFO  : Compiling command(queryId=hive_20200916052323_430f6ccb-6cb6-4de5-9ab3-e36347f27bf4): SHOW CREATE TABLE default.tips_ext_csv_purge
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_430f6ccb-6cb6-4de5-9ab3-e36347f27bf4); Time taken: 0.165 seconds
+INFO  : Executing command(queryId=hive_20200916052323_430f6ccb-6cb6-4de5-9ab3-e36347f27bf4): SHOW CREATE TABLE default.tips_ext_csv_purge
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_430f6ccb-6cb6-4de5-9ab3-e36347f27bf4); Time taken: 0.02 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE EXTERNAL TABLE `default.tips_ext_csv_purge`( |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| WITH SERDEPROPERTIES (                             |
+|   'field.delim'=',',                               |
+|   'serialization.format'=',')                      |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_csv_ext' |
+| TBLPROPERTIES (                                    |
+|   'COLUMN_STATS_ACCURATE'='false',                 |
+|   'external.table.purge'='true',                   |
+|   'numFiles'='0',                                  |
+|   'numRows'='-1',                                  |
+|   'rawDataSize'='-1',                              |
+|   'totalSize'='0',                                 |
+|   'transient_lastDdlTime'='1600250028')            |
++----------------------------------------------------+--+
+27 rows selected (0.216 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE default.tips_ext_pq       ;
+INFO  : Compiling command(queryId=hive_20200916052323_621fe52d-9453-4d72-ad71-e6937a034e87): SHOW CREATE TABLE default.tips_ext_pq
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_621fe52d-9453-4d72-ad71-e6937a034e87); Time taken: 0.182 seconds
+INFO  : Executing command(queryId=hive_20200916052323_621fe52d-9453-4d72-ad71-e6937a034e87): SHOW CREATE TABLE default.tips_ext_pq
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_621fe52d-9453-4d72-ad71-e6937a034e87); Time taken: 0.02 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE EXTERNAL TABLE `default.tips_ext_pq`(       |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'  |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_pq_ext' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600249944')            |
++----------------------------------------------------+--+
+18 rows selected (0.233 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE default.tips_ext_pq_purge ;
+INFO  : Compiling command(queryId=hive_20200916052323_f3194ea9-44df-44bb-8f04-220f2ae36254): SHOW CREATE TABLE default.tips_ext_pq_purge
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_f3194ea9-44df-44bb-8f04-220f2ae36254); Time taken: 0.136 seconds
+INFO  : Executing command(queryId=hive_20200916052323_f3194ea9-44df-44bb-8f04-220f2ae36254): SHOW CREATE TABLE default.tips_ext_pq_purge
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_f3194ea9-44df-44bb-8f04-220f2ae36254); Time taken: 0.015 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE EXTERNAL TABLE `default.tips_ext_pq_purge`( |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'  |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_pq_ext_purge' |
+| TBLPROPERTIES (                                    |
+|   'external.table.purge'='true',                   |
+|   'transient_lastDdlTime'='1600249984')            |
++----------------------------------------------------+--+
+19 rows selected (0.176 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE default.tips_managed_csv  ;
+INFO  : Compiling command(queryId=hive_20200916052323_46478dc5-1d44-4b19-bef9-d7b40ed3f14d): SHOW CREATE TABLE default.tips_managed_csv
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_46478dc5-1d44-4b19-bef9-d7b40ed3f14d); Time taken: 0.132 seconds
+INFO  : Executing command(queryId=hive_20200916052323_46478dc5-1d44-4b19-bef9-d7b40ed3f14d): SHOW CREATE TABLE default.tips_managed_csv
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_46478dc5-1d44-4b19-bef9-d7b40ed3f14d); Time taken: 0.023 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `default.tips_managed_csv`(           |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'  |
+| WITH SERDEPROPERTIES (                             |
+|   'field.delim'=',',                               |
+|   'serialization.format'=',')                      |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.mapred.TextInputFormat'       |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/user/hive/warehouse/tips_managed_csv' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600249933')            |
++----------------------------------------------------+--+
+21 rows selected (0.203 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE default.tips_managed_pq   ;
+INFO  : Compiling command(queryId=hive_20200916052323_5e83af79-db2b-4485-b703-87445f4b5ce7): SHOW CREATE TABLE default.tips_managed_pq
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_5e83af79-db2b-4485-b703-87445f4b5ce7); Time taken: 0.158 seconds
+INFO  : Executing command(queryId=hive_20200916052323_5e83af79-db2b-4485-b703-87445f4b5ce7): SHOW CREATE TABLE default.tips_managed_pq
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_5e83af79-db2b-4485-b703-87445f4b5ce7); Time taken: 0.019 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `default.tips_managed_pq`(            |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'  |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/user/hive/warehouse/tips_managed_pq' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600249925')            |
++----------------------------------------------------+--+
+18 rows selected (0.223 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw> SHOW CREATE TABLE default.tips_pq_loc;
+INFO  : Compiling command(queryId=hive_20200916052323_ed0fede7-b5bf-4e13-b5e3-08dd8c4a661d): SHOW CREATE TABLE default.tips_pq_loc
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:createtab_stmt, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20200916052323_ed0fede7-b5bf-4e13-b5e3-08dd8c4a661d); Time taken: 0.147 seconds
+INFO  : Executing command(queryId=hive_20200916052323_ed0fede7-b5bf-4e13-b5e3-08dd8c4a661d): SHOW CREATE TABLE default.tips_pq_loc
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20200916052323_ed0fede7-b5bf-4e13-b5e3-08dd8c4a661d); Time taken: 0.023 seconds
+INFO  : OK
++----------------------------------------------------+--+
+|                   createtab_stmt                   |
++----------------------------------------------------+--+
+| CREATE TABLE `default.tips_pq_loc`(                |
+|   `total_bill` float,                              |
+|   `tip` float,                                     |
+|   `sex` string,                                    |
+|   `smoker` string,                                 |
+|   `day` string,                                    |
+|   `time` string,                                   |
+|   `size` tinyint)                                  |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'  |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_pq_loc' |
+| TBLPROPERTIES (                                    |
+|   'transient_lastDdlTime'='1600250009')            |
++----------------------------------------------------+--+
+18 rows selected (0.209 seconds)
+0: jdbc:hive2://ccycloud-1.tristan-c5.root.hw>
+
+
+
+SHOW CREATE TABLE db_std_loc.tips_orc;
+SHOW CREATE TABLE db_std_loc.tips_orc_external;
+SHOW CREATE TABLE db_std_loc.tips_orc_external_purge;
+
+
+
+
+
+CREATE TABLE default.tips_defaults3 AS SELECT * FROM default.tips;
+
+CREATE TABLE default.tips_managed_pq3 STORED AS PARQUETFILE AS SELECT * FROM tips;
+
+CREATE TABLE default.tips_managed_csv3 ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE AS SELECT * FROM tips;
+
+CREATE EXTERNAL TABLE default.tips_ext_pq3 (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_pq_ext/'; 
+
+CREATE EXTERNAL TABLE default.tips_ext_csv3 (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_csv_ext/'; 
+
+CREATE EXTERNAL TABLE default.tips_ext_pq_purge3 (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_pq_ext_purge/' TBLPROPERTIES ('external.table.purge'='true'); 
+
+CREATE TABLE default.tips_pq_loc3 (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_pq_loc3/' ;
+
+INSERT INTO default.tips_pq_loc3 SELECT * FROM default.tips;
+
+CREATE EXTERNAL TABLE default.tips_ext_csv_purge3 (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/default_tips_csv_ext/' TBLPROPERTIES ('external.table.purge'='true'); 
+
+USE  db_std_loc;
+
+CREATE TABLE db_std_loc.tips3 AS SELECT * FROM default.tips;
+
+CREATE TABLE db_std_loc.tips_defaults3 AS SELECT * FROM tips;
+
+CREATE TABLE db_std_loc.tips_managed_pq3 STORED AS PARQUETFILE AS SELECT * FROM tips;
+
+CREATE TABLE db_std_loc.tips_managed_csv3 ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE AS SELECT * FROM tips;
+
+CREATE EXTERNAL TABLE db_std_loc.tips_ext_pq3 (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_pq_ext/'; 
+
+CREATE EXTERNAL TABLE db_std_loc.tips_ext_csv3 (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_csv_ext/'; 
+
+CREATE EXTERNAL TABLE db_std_loc.tips_ext_pq_purge3 (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_pq_ext_purge/' TBLPROPERTIES ('external.table.purge'='true'); 
+
+CREATE TABLE db_std_loc.tips_pq_loc3 (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_pq_loc3/' ;
+
+INSERT INTO db_std_loc.tips_pq_loc3 SELECT * FROM db_std_loc.tips;
+
+CREATE EXTERNAL TABLE db_std_loc.tips_ext_csv_purge3 (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_std_loc_tips_csv_ext/' TBLPROPERTIES ('external.table.purge'='true'); 
+
+CREATE DATABASE db_cust_loc3 LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc3';
+
+USE  db_cust_loc3;
+
+CREATE TABLE tips AS SELECT * FROM default.tips;
+
+CREATE TABLE db_cust_loc3.tips_defaults AS SELECT * FROM tips;
+
+CREATE TABLE db_cust_loc3.tips_managed_pq STORED AS PARQUETFILE AS SELECT * FROM tips;
+
+CREATE TABLE db_cust_loc3.tips_managed_csv ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE AS SELECT * FROM tips;
+
+CREATE EXTERNAL TABLE db_cust_loc3.tips_ext_pq (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc3_tips_pq_ext/'; 
+
+INSERT INTO db_cust_loc3.tips_ext_pq SELECT * FROM db_cust_loc3.tips;
+
+CREATE EXTERNAL TABLE db_cust_loc3.tips_ext_csv (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc3_tips_csv_ext/'; 
+
+INSERT INTO db_cust_loc3.tips_ext_csv SELECT * FROM db_cust_loc3.tips;
+
+CREATE EXTERNAL TABLE db_cust_loc3.tips_ext_pq_purge (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc3_tips_pq_ext_purge/' TBLPROPERTIES ('external.table.purge'='true'); 
+
+INSERT INTO db_cust_loc3.tips_ext_pq_purge SELECT * FROM db_cust_loc3.tips;
+
+CREATE TABLE db_cust_loc3.tips_pq_loc (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) STORED AS PARQUETFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc3_tips_pq_loc/' ;
+
+INSERT INTO db_cust_loc3.tips_pq_loc SELECT * FROM db_cust_loc3.tips;
+
+CREATE EXTERNAL TABLE db_cust_loc3.tips_ext_csv_purge (   total_bill FLOAT,   tip FLOAT,   sex STRING,   smoker STRING,   day STRING,   time STRING,   size TINYINT ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' WITH SERDEPROPERTIES ('field.delim'=',', 'serialization.format'=',') STORED AS TEXTFILE LOCATION 'hdfs://ccycloud-1.tristan-c5.root.hwx.site:8020/data/db_cust_loc3_tips_csv_ext/' TBLPROPERTIES ('external.table.purge'='true'); 
+
+INSERT INTO db_cust_loc3.tips_ext_csv_purge SELECT * FROM db_cust_loc3.tips;
+
+
+
+SHOW CREATE TABLE default.tips3              ;
+SHOW CREATE TABLE default.tips_defaults3     ;
+SHOW CREATE TABLE default.tips_ext_csv3      ;
+SHOW CREATE TABLE default.tips_ext_csv_purge3;
+SHOW CREATE TABLE default.tips_ext_pq3       ;
+SHOW CREATE TABLE default.tips_ext_pq_purge3 ;
+SHOW CREATE TABLE default.tips_managed_csv3  ;
+SHOW CREATE TABLE default.tips_managed_pq3   ;
+SHOW CREATE TABLE default.tips_pq_loc3;
+
+SHOW CREATE TABLE db_std_loc.tips3              ;
+SHOW CREATE TABLE db_std_loc.tips_defaults3     ;
+SHOW CREATE TABLE db_std_loc.tips_ext_csv3      ;
+SHOW CREATE TABLE db_std_loc.tips_ext_csv_purge3;
+SHOW CREATE TABLE db_std_loc.tips_ext_pq3       ;
+SHOW CREATE TABLE db_std_loc.tips_ext_pq_purge3 ;
+SHOW CREATE TABLE db_std_loc.tips_managed_csv3  ;
+SHOW CREATE TABLE db_std_loc.tips_managed_pq3   ;
+SHOW CREATE TABLE db_std_loc.tips_pq_loc3;
+
+SHOW CREATE TABLE db_cust_loc3.tips              ;
+SHOW CREATE TABLE db_cust_loc3.tips_defaults     ;
+SHOW CREATE TABLE db_cust_loc3.tips_ext_csv      ;
+SHOW CREATE TABLE db_cust_loc3.tips_ext_csv_purge;
+SHOW CREATE TABLE db_cust_loc3.tips_ext_pq       ;
+SHOW CREATE TABLE db_cust_loc3.tips_ext_pq_purge ;
+SHOW CREATE TABLE db_cust_loc3.tips_managed_csv  ;
+SHOW CREATE TABLE db_cust_loc3.tips_managed_pq   ;
+SHOW CREATE TABLE db_cust_loc3.tips_pq_loc;
